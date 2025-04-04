@@ -16,6 +16,9 @@ export interface Report {
   status: ReportStatus;
   reporter: string; // This would be a hashed or anonymized identifier
   ipfsHash?: string; // For additional details stored on IPFS
+  transactionHash?: string; // Blockchain transaction hash
+  blockNumber?: number; // Block number where the transaction was confirmed
+  contractAddress?: string; // Address of the smart contract
 }
 
 export interface ReportSubmission {

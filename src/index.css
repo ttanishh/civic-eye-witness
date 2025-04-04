@@ -5,83 +5,83 @@
 
 @layer base {
   :root {
-    --background: 190 30% 97%;
-    --foreground: 190 50% 10%;
+    --background: 195 30% 97%;
+    --foreground: 210 50% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 190 50% 10%;
+    --card-foreground: 210 50% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 190 50% 10%;
+    --popover-foreground: 210 50% 10%;
 
-    --primary: 190 80% 28%;
-    --primary-foreground: 190 10% 98%;
+    --primary: 210 80% 28%;
+    --primary-foreground: 210 10% 98%;
 
-    --secondary: 190 70% 40%;
-    --secondary-foreground: 190 10% 98%;
+    --secondary: 210 70% 40%;
+    --secondary-foreground: 210 10% 98%;
 
-    --muted: 190 10% 92%;
-    --muted-foreground: 190 30% 40%;
+    --muted: 210 10% 92%;
+    --muted-foreground: 210 30% 40%;
 
-    --accent: 30 100% 60%;
-    --accent-foreground: 190 50% 10%;
+    --accent: 40 100% 60%;
+    --accent-foreground: 210 50% 10%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 190 10% 98%;
+    --destructive-foreground: 210 10% 98%;
 
-    --border: 190 20% 85%;
-    --input: 190 20% 85%;
-    --ring: 190 70% 40%;
+    --border: 210 20% 85%;
+    --input: 210 20% 85%;
+    --ring: 210 70% 40%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 190 80% 28%;
-    --sidebar-foreground: 190 10% 98%;
-    --sidebar-primary: 190 70% 40%;
+    --sidebar-background: 210 80% 28%;
+    --sidebar-foreground: 210 10% 98%;
+    --sidebar-primary: 210 70% 40%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 30 100% 60%;
-    --sidebar-accent-foreground: 190 50% 10%;
-    --sidebar-border: 190 60% 40%;
-    --sidebar-ring: 190 70% 60%;
+    --sidebar-accent: 40 100% 60%;
+    --sidebar-accent-foreground: 210 50% 10%;
+    --sidebar-border: 210 60% 40%;
+    --sidebar-ring: 210 70% 60%;
   }
 
   .dark {
-    --background: 190 50% 10%;
-    --foreground: 190 10% 98%;
+    --background: 210 50% 10%;
+    --foreground: 210 10% 98%;
 
-    --card: 190 40% 15%;
-    --card-foreground: 190 10% 98%;
+    --card: 210 40% 15%;
+    --card-foreground: 210 10% 98%;
 
-    --popover: 190 40% 15%;
-    --popover-foreground: 190 10% 98%;
+    --popover: 210 40% 15%;
+    --popover-foreground: 210 10% 98%;
 
-    --primary: 190 70% 40%;
-    --primary-foreground: 190 10% 98%;
+    --primary: 210 70% 40%;
+    --primary-foreground: 210 10% 98%;
 
-    --secondary: 190 50% 30%;
-    --secondary-foreground: 190 10% 98%;
+    --secondary: 210 50% 30%;
+    --secondary-foreground: 210 10% 98%;
 
-    --muted: 190 30% 20%;
-    --muted-foreground: 190 20% 70%;
+    --muted: 210 30% 20%;
+    --muted-foreground: 210 20% 70%;
 
-    --accent: 30 100% 60%;
-    --accent-foreground: 190 50% 10%;
+    --accent: 40 100% 60%;
+    --accent-foreground: 210 50% 10%;
 
     --destructive: 0 62.8% 40.6%;
-    --destructive-foreground: 190 10% 98%;
+    --destructive-foreground: 210 10% 98%;
 
-    --border: 190 40% 25%;
-    --input: 190 40% 25%;
-    --ring: 190 70% 40%;
+    --border: 210 40% 25%;
+    --input: 210 40% 25%;
+    --ring: 210 70% 40%;
 
-    --sidebar-background: 190 40% 15%;
-    --sidebar-foreground: 190 10% 98%;
-    --sidebar-primary: 190 70% 40%;
+    --sidebar-background: 210 40% 15%;
+    --sidebar-foreground: 210 10% 98%;
+    --sidebar-primary: 210 70% 40%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 30 100% 60%;
-    --sidebar-accent-foreground: 190 50% 10%;
-    --sidebar-border: 190 40% 25%;
-    --sidebar-ring: 190 70% 40%;
+    --sidebar-accent: 40 100% 60%;
+    --sidebar-accent-foreground: 210 50% 10%;
+    --sidebar-border: 210 40% 25%;
+    --sidebar-ring: 210 70% 40%;
   }
 }
 
@@ -110,5 +110,65 @@
 
   .report-card {
     @apply bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+  }
+  
+  .evidence-badge {
+    @apply inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  
+  .evidence-badge-image {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .evidence-badge-video {
+    @apply bg-purple-100 text-purple-800;
+  }
+  
+  .evidence-badge-document {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .evidence-badge-audio {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .crime-category-badge {
+    @apply inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  
+  .crime-category-theft {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  .crime-category-assault {
+    @apply bg-orange-100 text-orange-800;
+  }
+  
+  .crime-category-vandalism {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .crime-category-fraud {
+    @apply bg-purple-100 text-purple-800;
+  }
+  
+  .crime-category-harassment {
+    @apply bg-pink-100 text-pink-800;
+  }
+  
+  .crime-category-other {
+    @apply bg-gray-100 text-gray-800;
+  }
+  
+  .kavach-gradient {
+    @apply bg-gradient-to-r from-civic-primary to-civic-secondary text-white;
+  }
+  
+  .kavach-card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
+  }
+  
+  .kavach-input {
+    @apply border-civic-primary/20 focus-visible:ring-civic-primary;
   }
 }

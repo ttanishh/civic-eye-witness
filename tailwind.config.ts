@@ -63,15 +63,25 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				kavach: {
+					primary: '#0F4C81',    // Deep blue
+					secondary: '#3A7CA5',  // Medium blue
+					accent: '#F39C12',     // Gold/amber
+					light: '#EBF5FB',      // Light blue background
+					dark: '#0C3C65',       // Darker blue
+					alert: '#E74C3C',      // Red for alerts
+					success: '#2ECC71',    // Green for success
+					pending: '#F39C12'     // Amber for pending
+				},
 				civic: {
-					primary: '#0a6e81',
-					secondary: '#1d9aae',
-					accent: '#ff7d3b',
-					light: '#e8f5f7',
-					dark: '#054450',
-					alert: '#f44336',
-					success: '#4caf50',
-					pending: '#ff9800'
+					primary: '#0F4C81',    // Deep blue
+					secondary: '#3A7CA5',  // Medium blue
+					accent: '#F39C12',     // Gold/amber
+					light: '#EBF5FB',      // Light blue background
+					dark: '#0C3C65',       // Darker blue
+					alert: '#E74C3C',      // Red for alerts
+					success: '#2ECC71',    // Green for success
+					pending: '#F39C12'     // Amber for pending
 				}
 			},
 			borderRadius: {
@@ -99,12 +109,17 @@ export default {
 				'pulse-fade': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.5' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-fade': 'pulse-fade 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+				'pulse-fade': 'pulse-fade 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'float': 'float 3s ease-in-out infinite'
 			}
 		}
 	},

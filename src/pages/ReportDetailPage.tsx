@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { getReportFromBlockchain } from "@/lib/contractInterface";
 import { Report } from "@/types/report";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, MapPin, FileHash, Layers, FileCode } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, FileText, Layers, FileCode } from "lucide-react";
 
 export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -137,7 +136,7 @@ export default function ReportDetailPage() {
               <div className="space-y-4">
                 {report.transactionHash ? (
                   <div className="flex items-start gap-3">
-                    <FileHash className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
+                    <FileText className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-medium">Transaction Hash</p>
                       <p className="text-sm font-mono break-all">{report.transactionHash}</p>
@@ -148,7 +147,7 @@ export default function ReportDetailPage() {
                   </div>
                 ) : (
                   <div className="flex items-start gap-3">
-                    <FileHash className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
+                    <FileText className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-medium">Transaction Hash</p>
                       <p className="text-sm font-mono">tx-hash-{Date.now()} (Simulated)</p>

@@ -1,68 +1,78 @@
 
 import Link from 'next/link';
-import { Calendar, MapPin, Eye } from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
 export default function ReportCard({ report, userType = 'u' }) {
-  const { id, title, description, status, timestamp, location, category } = report;
-
-  const getBackgroundColor = () => {
-    if (status === 'new') return 'border-l-amber-500';
-    if (status === 'in_review') return 'border-l-blue-500';
-    if (status === 'assigned') return 'border-l-purple-500';
-    if (status === 'resolved') return 'border-l-green-500';
-    return 'border-l-gray-500';
+  const formatDate = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
-
+  
+  const getCategoryLabel = (category) => {
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+  
+  const getUrgencyLabel = (level) => {
+    if (level <= 2) return 'Low';
+    if (level >= 4) return 'High';
+    return 'Medium';
+  };
+  
+  const getUrgencyColor = (level) => {
+    if (level <= 2) return 'bg-green-100 text-green-800';
+    if (level >= 4) return 'bg-red-100 text-red-800';
+    return 'bg-yellow-100 text-yellow-800';
+  };
+  
   return (
-    <div className={`bg-white rounded-lg shadow-sm border-l-4 ${getBackgroundColor()} hover:shadow-md transition-shadow overflow-hidden`}>
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-gray-800 truncate">{title}</h3>
-          <StatusBadge status={status} />
-        </div>
-        
-        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-          {description}
-        </p>
-        
-        <div className="flex justify-between items-center text-xs text-gray-500">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            <span>{formatDate(timestamp)}</span>
+    <Link href={`/${userType}/reports/${report.id}`} className="block">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 h-full hover:shadow-md transition-shadow">
+        <div className="flex flex-col h-full">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-lg font-medium text-gray-800 line-clamp-2">{report.title}</h3>
+            <StatusBadge status={report.status} />
           </div>
           
-          {location && (
+          <div className="flex flex-wrap gap-y-1 gap-x-4 text-sm text-gray-600 mb-3">
             <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              <span className="truncate max-w-28">
-                {location.address || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`}
-              </span>
+              <Calendar className="h-4 w-4 text-gray-400" />
+              <span>{formatDate(report.timestamp)}</span>
             </div>
-          )}
+            
+            {report.location && report.location.address && (
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                <span>{report.location.address}</span>
+              </div>
+            )}
+          </div>
+          
+          <p className="text-gray-600 text-sm line-clamp-2 mb-3 flex-grow">
+            {report.description}
+          </p>
+          
+          <div className="flex flex-wrap gap-2 mt-auto pt-2">
+            {report.category && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                {getCategoryLabel(report.category)}
+              </span>
+            )}
+            
+            {report.urgencyLevel && (
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getUrgencyColor(report.urgencyLevel)}`}>
+                {getUrgencyLabel(report.urgencyLevel)} Priority
+              </span>
+            )}
+          </div>
         </div>
       </div>
-      
-      <div className="border-t border-gray-100">
-        <Link 
-          href={`/${userType}/reports/${id}`}
-          className="block py-2 px-4 text-civic-primary text-sm font-medium hover:bg-gray-50 transition-colors text-center flex items-center justify-center gap-1"
-        >
-          <Eye className="h-4 w-4" />
-          <span>View Details</span>
-        </Link>
-      </div>
-    </div>
+    </Link>
   );
 }

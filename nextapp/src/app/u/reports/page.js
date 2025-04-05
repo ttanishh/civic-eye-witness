@@ -3,21 +3,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Search, Filter, Plus } from 'lucide-react';
-import ReportCard from '@/components/ReportCard';
 import Link from 'next/link';
+import { Search, Filter, Loader, Plus } from 'lucide-react';
+import StatusBadge from '@/components/StatusBadge';
 
-export default function MyReportsPage() {
+export default function ReportsPage() {
   const [reports, setReports] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   
   useEffect(() => {
     // Mock API call to fetch reports
     const fetchReports = async () => {
-      setIsLoading(true);
+      setLoading(true);
       
       try {
         // Simulate API delay
@@ -27,63 +27,81 @@ export default function MyReportsPage() {
         const mockReports = [
           {
             id: '1',
-            title: 'Theft at Market Area',
-            description: 'My wallet was stolen at the vegetable market. I was near the fruit stalls when it happened.',
-            status: 'new',
-            timestamp: '2025-04-02T10:30:00',
+            title: 'Stolen Bicycle',
+            description: 'My bicycle was stolen from outside the mall. It\'s a red mountain bike with a black basket.',
             category: 'theft',
-            location: {
-              latitude: 23.022505,
-              longitude: 72.571365,
-              address: 'Vegetable Market, Ahmedabad',
+            location: { 
+              latitude: 23.022505, 
+              longitude: 72.571365, 
+              address: 'Central Mall, Ahmedabad' 
             },
+            timestamp: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
+            status: 'in_review',
+            urgencyLevel: 3
           },
           {
             id: '2',
-            title: 'Vandalism in Park',
-            description: 'Public benches in the park have been damaged with spray paint and several lights have been broken.',
-            status: 'in_review',
-            timestamp: '2025-04-01T15:45:00',
+            title: 'Vandalism at Park',
+            description: 'Someone has spray painted graffiti on the walls of the children\'s play area in City Park.',
             category: 'vandalism',
-            location: {
-              latitude: 23.022505,
-              longitude: 72.571365,
-              address: 'City Park, Ahmedabad',
+            location: { 
+              latitude: 23.022505, 
+              longitude: 72.571365, 
+              address: 'City Park, Ahmedabad' 
             },
+            timestamp: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
+            status: 'resolved',
+            urgencyLevel: 2
           },
           {
             id: '3',
-            title: 'Suspicious Person',
-            description: 'A suspicious person has been loitering around our residential area at night for the past three days.',
-            status: 'assigned',
-            timestamp: '2025-03-29T20:15:00',
-            category: 'other',
-            location: {
-              latitude: 23.022505,
-              longitude: 72.571365,
-              address: 'Residential Colony, Sector 7, Gandhinagar',
+            title: 'Phone Scam',
+            description: 'I received a call from someone claiming to be from my bank asking for my account details.',
+            category: 'fraud',
+            location: { 
+              latitude: 23.022505, 
+              longitude: 72.571365, 
+              address: 'Residence, Ahmedabad' 
             },
+            timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
+            status: 'new',
+            urgencyLevel: 4
           },
           {
             id: '4',
-            title: 'Accident on Highway',
-            description: 'Witnessed a hit and run accident on the highway. A motorcyclist was hit by a speeding car.',
-            status: 'resolved',
-            timestamp: '2025-03-25T08:20:00',
+            title: 'Hit and Run',
+            description: 'A vehicle hit my parked car and drove away without leaving any contact information.',
             category: 'other',
-            location: {
-              latitude: 23.022505,
-              longitude: 72.571365,
-              address: 'NH 48, Near Toll Plaza',
+            location: { 
+              latitude: 23.022505, 
+              longitude: 72.571365, 
+              address: 'Residential Society, Sector 10, Gandhinagar' 
             },
+            timestamp: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
+            status: 'assigned',
+            urgencyLevel: 3
           },
+          {
+            id: '5',
+            title: 'Shop Breaking',
+            description: 'My shop was broken into last night. Electronics and cash were stolen.',
+            category: 'theft',
+            location: { 
+              latitude: 23.022505, 
+              longitude: 72.571365, 
+              address: 'Market Area, Ahmedabad' 
+            },
+            timestamp: new Date(Date.now() - 3600000 * 24 * 1).toISOString(),
+            status: 'new',
+            urgencyLevel: 5
+          }
         ];
         
         setReports(mockReports);
       } catch (error) {
         console.error('Error fetching reports:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
@@ -102,6 +120,7 @@ export default function MyReportsPage() {
       return (
         report.title.toLowerCase().includes(query) ||
         report.description.toLowerCase().includes(query) ||
+        report.category.toLowerCase().includes(query) ||
         (report.location.address && report.location.address.toLowerCase().includes(query))
       );
     }
@@ -109,40 +128,57 @@ export default function MyReportsPage() {
     return true;
   });
   
+  const handleReportClick = (id) => {
+    router.push(`/u/reports/${id}`);
+  };
+  
+  const formatDate = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+  
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">My Reports</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">My Reports</h1>
+          <p className="text-gray-600">Track the status of your submitted reports</p>
+        </div>
+        
         <Link
           href="/u/reports/new"
-          className="flex items-center gap-1 bg-civic-primary text-white px-4 py-2 rounded-md hover:bg-civic-dark transition-colors"
+          className="inline-flex items-center justify-center gap-1 bg-civic-primary text-white px-4 py-2 rounded-md hover:bg-civic-dark transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>New Report</span>
         </Link>
       </div>
       
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search reports..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-civic-primary focus:border-transparent"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           </div>
-          <input
-            type="text"
-            placeholder="Search reports..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:ring-2 focus:ring-civic-primary focus:border-transparent"
-          />
-        </div>
-        
-        <div className="w-full md:w-auto flex">
-          <div className="relative flex items-center bg-white border border-gray-300 rounded-md px-3">
-            <Filter className="h-4 w-4 text-gray-400 mr-2" />
+          
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-transparent py-2 pr-8 appearance-none focus:outline-none"
+              className="border border-gray-300 rounded-md px-2 py-2 focus:ring-2 focus:ring-civic-primary focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="new">New</option>
@@ -155,33 +191,64 @@ export default function MyReportsPage() {
         </div>
       </div>
       
-      {isLoading ? (
+      {loading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-civic-primary"></div>
+          <Loader className="h-8 w-8 animate-spin text-civic-primary" />
         </div>
-      ) : filteredReports.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredReports.map(report => (
-            <ReportCard key={report.id} report={report} userType="u" />
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <FileText className="h-8 w-8 text-gray-500" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No reports found</h3>
+      ) : filteredReports.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
+          <h3 className="text-lg font-medium text-gray-800 mb-2">No reports found</h3>
           <p className="text-gray-500 mb-6">
-            {searchQuery || statusFilter !== 'all'
-              ? "No reports match your current filters. Try changing your search criteria."
-              : "You haven't submitted any crime reports yet."}
+            {searchQuery || statusFilter !== 'all' ? 
+              'Try changing your search or filter criteria.' : 
+              'You haven\'t submitted any reports yet.'}
           </p>
           <Link
             href="/u/reports/new"
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-civic-primary hover:bg-civic-dark transition-colors"
+            className="inline-flex items-center justify-center gap-1 bg-civic-primary text-white px-4 py-2 rounded-md hover:bg-civic-dark transition-colors"
           >
-            Submit New Report
+            <Plus className="h-4 w-4" />
+            <span>Submit a Report</span>
           </Link>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredReports.map(report => (
+            <div 
+              key={report.id}
+              className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleReportClick(report.id)}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800">{report.title}</h3>
+                  <p className="text-gray-500 text-sm mt-1">{formatDate(report.timestamp)}</p>
+                </div>
+                <StatusBadge status={report.status} />
+              </div>
+              
+              <p className="text-gray-600 mt-3 line-clamp-2">
+                {report.description}
+              </p>
+              
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {report.category.charAt(0).toUpperCase() + report.category.slice(1)}
+                </span>
+                
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  report.urgencyLevel <= 2 ? 'bg-green-100 text-green-800' : 
+                  report.urgencyLevel >= 4 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  Urgency: {report.urgencyLevel}/5
+                </span>
+                
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {report.location.address}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

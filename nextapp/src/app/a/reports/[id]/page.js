@@ -2,161 +2,197 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
 import { 
-  ArrowLeft, 
-  Calendar, 
-  MapPin, 
-  Tag, 
+  ChevronLeft, 
   User, 
-  CheckSquare, 
+  MapPin, 
+  Calendar, 
+  Clock, 
   MessageSquare, 
-  Download,
-  FileText,
-  Clock,
-  Phone,
-  Loader,
-  Eye
+  Send, 
+  Save,
+  Check,
+  AlertTriangle,
+  Loader
 } from 'lucide-react';
+import { toast } from 'sonner';
 import StatusBadge from '@/components/StatusBadge';
-import StatusTimeline from '@/components/StatusTimeline';
+import ReportEvidence from '@/components/ReportEvidence';
 
-export default function AdminReportDetailPage({ params }) {
+export default function AdminReportDetailPage() {
   const [report, setReport] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [statusNote, setStatusNote] = useState('');
-  const [newStatus, setNewStatus] = useState('');
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [selectedOfficer, setSelectedOfficer] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [notes, setNotes] = useState([]);
+  const [newNote, setNewNote] = useState('');
+  const [status, setStatus] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [assignedOfficer, setAssignedOfficer] = useState('');
+  const [officers, setOfficers] = useState([]);
+  const params = useParams();
   const router = useRouter();
-  const { id } = params;
   
   useEffect(() => {
-    const fetchReport = async () => {
-      setIsLoading(true);
+    const fetchReportDetails = async () => {
+      setLoading(true);
       
       try {
-        // Simulate API delay
+        // Mock API call - in a real app, this would fetch from a database or blockchain
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Mock data
+        // Mock report data
         const mockReport = {
-          id,
+          id: params.id,
           title: 'Theft at Market Area',
-          description: 'My wallet was stolen at the vegetable market. I had approximately ₹2,000 in cash, my ID card, and bank cards. The incident happened around 10:30 AM when the market was crowded. I was near the fruit stalls when I noticed my pocket had been picked. I didn\'t see the person who took it, but I remember being bumped by someone in the crowd just before I noticed it was missing.',
-          status: 'in_review',
-          timestamp: '2025-04-02T10:30:00',
+          description: 'Wallet stolen at the vegetable market. I was shopping at the market around 10:30 AM when I noticed my wallet was missing from my bag. The wallet contained my ID cards, credit cards, and about ₹2,000 in cash. I had my bag with me the entire time, but it was crowded in the vegetable section. I believe someone might have pickpocketed me while I was selecting vegetables. There were many people around, so I did not notice anything suspicious at the time.',
           category: 'theft',
+          status: 'in_review',
+          urgencyLevel: 3,
+          reportedBy: {
+            phoneNumber: '+919876543210',
+            name: 'Rajesh Sharma'
+          },
+          timestamp: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
           location: {
             latitude: 23.022505,
             longitude: 72.571365,
-            address: 'Vegetable Market, Ahmedabad',
+            address: 'Vegetable Market, Bopal, Ahmedabad'
           },
-          reportedBy: {
-            phone: '+919876543210',
-            name: 'Citizen',
-          },
-          assignedTo: 'SI Suresh Kumar',
-          evidences: [
+          evidence: [
             {
               type: 'image',
-              description: 'Photo of the market area where incident occurred',
-              timestamp: '2025-04-02T10:45:00',
+              description: 'Photo of the area where the theft occurred',
+              timestamp: new Date(Date.now() - 3600000 * 24 * 2).toISOString()
             },
             {
               type: 'document',
-              description: 'List of stolen items',
-              timestamp: '2025-04-02T11:00:00',
-            },
-          ],
-          timeline: [
-            {
-              id: '1',
-              status: 'new',
-              description: 'Report submitted',
-              timestamp: '2025-04-02T10:30:00',
-              note: 'Initial report filed via KAVACH app',
-            },
-            {
-              id: '2',
-              status: 'in_review',
-              description: 'Report assigned for review',
-              timestamp: '2025-04-02T11:15:00',
-              officer: 'SI Suresh Kumar',
-              note: 'Case taken up for preliminary investigation',
-            },
-          ],
-          district: 'Bopal',
-          urgencyLevel: 3,
+              description: 'List of items that were in the wallet',
+              timestamp: new Date(Date.now() - 3600000 * 24 * 2 + 3600000).toISOString()
+            }
+          ]
         };
         
+        // Mock notes
+        const mockNotes = [
+          {
+            id: '1',
+            content: 'Initial review completed. This appears to be a pickpocketing case that occurred in a crowded market area.',
+            timestamp: new Date(Date.now() - 3600000 * 24).toISOString(),
+            addedBy: 'ASI Rakesh Patel'
+          },
+          {
+            id: '2',
+            content: 'Contacted victim for additional details about the wallet and its contents. Will check with market security for any CCTV footage.',
+            timestamp: new Date(Date.now() - 3600000 * 12).toISOString(),
+            addedBy: 'ASI Rakesh Patel'
+          }
+        ];
+        
+        // Mock officers
+        const mockOfficers = [
+          { id: '1', name: 'SI Suresh Kumar' },
+          { id: '2', name: 'ASI Rakesh Patel' },
+          { id: '3', name: 'HC Amit Singh' },
+          { id: '4', name: 'Constable Meera Patel' }
+        ];
+        
         setReport(mockReport);
-        setNewStatus(mockReport.status);
-        setSelectedOfficer(mockReport.assignedTo || '');
+        setNotes(mockNotes);
+        setStatus(mockReport.status);
+        setAssignedOfficer(mockOfficers[1].id); // ASI Rakesh Patel
+        setOfficers(mockOfficers);
       } catch (error) {
-        console.error('Error fetching report:', error);
+        console.error('Error fetching report details:', error);
+        toast.error('Failed to load report details');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
-    fetchReport();
-  }, [id]);
+    fetchReportDetails();
+  }, [params.id]);
   
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-  
-  const handleStatusUpdate = () => {
-    if (newStatus === report.status && selectedOfficer === report.assignedTo) {
-      alert('No changes to update.');
+  const handleAddNote = async () => {
+    if (!newNote.trim()) {
+      toast.error('Please enter a note');
       return;
     }
     
-    setIsUpdating(true);
+    setAddingNote(true);
     
-    // Mock API call
-    setTimeout(() => {
-      // In a real app, this would be an API call to update the report
+    try {
+      // Mock API call - in a real app, this would add a note to the database
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const updatedTimeline = [...report.timeline];
-      if (newStatus !== report.status) {
-        updatedTimeline.push({
-          id: `${updatedTimeline.length + 1}`,
-          status: newStatus,
-          description: `Status changed from ${report.status} to ${newStatus}`,
-          timestamp: new Date().toISOString(),
-          officer: selectedOfficer || 'Station Admin',
-          note: statusNote,
-        });
-      }
+      const newNoteObj = {
+        id: Date.now().toString(),
+        content: newNote.trim(),
+        timestamp: new Date().toISOString(),
+        addedBy: 'ASI Rakesh Patel' // Normally would be the logged-in user
+      };
       
-      setReport({
-        ...report,
-        status: newStatus,
-        assignedTo: selectedOfficer,
-        timeline: updatedTimeline,
-      });
-      
-      setStatusNote('');
-      setIsUpdating(false);
-      
-      alert('Report status updated successfully!');
-    }, 1500);
+      setNotes([...notes, newNoteObj]);
+      setNewNote('');
+      toast.success('Note added successfully');
+    } catch (error) {
+      console.error('Error adding note:', error);
+      toast.error('Failed to add note');
+    } finally {
+      setAddingNote(false);
+    }
   };
   
-  if (isLoading) {
+  const handleStatusChange = async () => {
+    if (status === report.status) {
+      toast.info('Status is unchanged');
+      return;
+    }
+    
+    setUpdatingStatus(true);
+    
+    try {
+      // Mock API call - in a real app, this would update the status in the database
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Update local state
+      setReport({ ...report, status });
+      toast.success(`Report status updated to ${getStatusLabel(status)}`);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast.error('Failed to update status');
+      setStatus(report.status); // Revert to original status
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+  
+  const getStatusLabel = (statusCode) => {
+    const statusMap = {
+      'new': 'New',
+      'in_review': 'In Review',
+      'assigned': 'Assigned',
+      'resolved': 'Resolved',
+      'closed': 'Closed'
+    };
+    return statusMap[statusCode] || statusCode;
+  };
+  
+  const formatDate = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+  
+  if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-civic-primary"></div>
+        <Loader className="h-8 w-8 animate-spin text-civic-primary" />
       </div>
     );
   }
@@ -164,15 +200,15 @@ export default function AdminReportDetailPage({ params }) {
   if (!report) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold mb-2">Report not found</h2>
-        <p className="text-gray-600 mb-4">The report you're looking for doesn't exist or you don't have permission to view it.</p>
-        <Link
-          href="/a/reports"
-          className="inline-flex items-center text-civic-primary hover:underline"
+        <h2 className="text-xl font-semibold text-gray-800">Report not found</h2>
+        <p className="text-gray-600 mt-2">The requested report could not be found.</p>
+        <button
+          onClick={() => router.push('/a/reports')}
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-civic-primary hover:bg-civic-dark"
         >
-          <ArrowLeft className="h-4 w-4 mr-1" />
+          <ChevronLeft className="h-4 w-4 mr-1" />
           Back to Reports
-        </Link>
+        </button>
       </div>
     );
   }
@@ -180,134 +216,161 @@ export default function AdminReportDetailPage({ params }) {
   return (
     <div>
       <div className="flex items-center mb-6">
-        <Link
-          href="/a/reports"
-          className="mr-4 inline-flex items-center text-gray-600 hover:text-civic-primary"
+        <button
+          onClick={() => router.push('/a/reports')}
+          className="flex items-center gap-1 text-gray-600 hover:text-civic-primary mr-4"
         >
-          <ArrowLeft className="h-5 w-5 mr-1" />
-          Back
-        </Link>
-        <h1 className="text-2xl font-bold flex-1">Report: KVH-{report.id.padStart(6, '0')}</h1>
-        <StatusBadge status={report.status} />
+          <ChevronLeft className="h-5 w-5" />
+          <span>Back to Reports</span>
+        </button>
+        <h1 className="text-2xl font-bold">Report #{report.id}</h1>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">{report.title}</h2>
-            
-            <div className="flex flex-wrap gap-4 mb-4 text-sm">
-              <div className="flex items-center text-gray-600">
-                <Calendar className="h-4 w-4 mr-1" />
-                <span>{formatDate(report.timestamp)}</span>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h2 className="text-xl font-bold text-gray-800">{report.title}</h2>
+                <StatusBadge status={report.status} />
               </div>
               
-              <div className="flex items-center text-gray-600">
-                <MapPin className="h-4 w-4 mr-1" />
-                <span>{report.location.address}</span>
+              <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <span>{formatDate(report.timestamp)}</span>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <span>{report.location.address}</span>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4 text-gray-400" />
+                  <span>Reported by: {report.reportedBy.name}</span>
+                </div>
               </div>
               
-              <div className="flex items-center text-gray-600">
-                <Tag className="h-4 w-4 mr-1" />
-                <span className="capitalize">{report.category}</span>
+              <div className="mb-6">
+                <h3 className="text-md font-semibold mb-2">Description</h3>
+                <p className="text-gray-600 whitespace-pre-line">{report.description}</p>
               </div>
               
-              <div className="flex items-center text-gray-600">
-                <User className="h-4 w-4 mr-1" />
-                <span>Reported by: {report.reportedBy.phone}</span>
+              <div className="flex flex-wrap gap-2 mb-6">
+                <div className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
+                  Category: {report.category.charAt(0).toUpperCase() + report.category.slice(1)}
+                </div>
+                
+                <div className={`px-3 py-1 rounded-full text-sm text-white ${
+                  report.urgencyLevel <= 2 ? 'bg-green-500' : 
+                  report.urgencyLevel >= 4 ? 'bg-red-500' : 'bg-yellow-500'
+                }`}>
+                  Urgency: {report.urgencyLevel}/5
+                </div>
               </div>
               
-              <div className="flex items-center text-gray-600">
-                <Clock className="h-4 w-4 mr-1" />
-                <span>
-                  Urgency: 
-                  <span className={`ml-1 font-medium ${
-                    report.urgencyLevel <= 2 ? 'text-green-600' : 
-                    report.urgencyLevel >= 4 ? 'text-red-600' : 
-                    'text-amber-600'
-                  }`}>
-                    Level {report.urgencyLevel}
-                  </span>
-                </span>
+              <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                <h3 className="text-md font-semibold mb-2">Contact Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div>
+                    <span className="text-sm text-gray-500">Name:</span>
+                    <p className="font-medium">{report.reportedBy.name}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">Phone:</span>
+                    <p className="font-medium">{report.reportedBy.phoneNumber}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-            
-            <div className="prose max-w-none">
-              <p className="text-gray-700">{report.description}</p>
             </div>
           </div>
           
-          {report.evidences && report.evidences.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-lg font-semibold mb-4">Evidence Submitted</h2>
-              
-              <div className="space-y-3">
-                {report.evidences.map((evidence, index) => (
-                  <div key={index} className="flex bg-gray-50 p-3 rounded-md border border-gray-100">
-                    <div className="flex-shrink-0 mr-3">
-                      <div className="h-10 w-10 rounded bg-civic-light flex items-center justify-center">
-                        {evidence.type === 'image' && (
-                          <svg className="h-5 w-5 text-civic-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        )}
-                        {evidence.type === 'document' && (
-                          <svg className="h-5 w-5 text-civic-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{evidence.description}</p>
-                      <p className="text-xs text-gray-500">{formatDate(evidence.timestamp)}</p>
-                    </div>
-                    <div>
-                      <button className="p-2 text-civic-primary hover:bg-civic-light rounded-full">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {report.evidence && report.evidence.length > 0 && (
+            <ReportEvidence evidence={report.evidence} />
           )}
           
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Location Information</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold">Case Notes</h3>
+            </div>
             
-            <div className="aspect-video bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-              <div className="text-center p-8">
-                <MapPin className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">Map showing incident location</p>
-                <p className="text-gray-400 text-xs mt-1">
-                  Coordinates: {report.location.latitude.toFixed(6)}, {report.location.longitude.toFixed(6)}
-                </p>
+            <div className="p-4">
+              {notes.length > 0 ? (
+                <div className="space-y-4 mb-6">
+                  {notes.map(note => (
+                    <div key={note.id} className="border-l-4 border-civic-primary bg-gray-50 p-4 rounded-r-md">
+                      <p className="text-gray-700">{note.content}</p>
+                      <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
+                        <span>{note.addedBy}</span>
+                        <span>{formatDate(note.timestamp)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500">
+                  <MessageSquare className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+                  <p>No notes have been added yet</p>
+                </div>
+              )}
+              
+              <div className="mt-4">
+                <label htmlFor="newNote" className="block text-sm font-medium text-gray-700 mb-1">
+                  Add a Note
+                </label>
+                <textarea
+                  id="newNote"
+                  rows={4}
+                  placeholder="Enter case note or update..."
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-civic-primary focus:border-transparent"
+                ></textarea>
+                
+                <div className="mt-2 flex justify-end">
+                  <button
+                    onClick={handleAddNote}
+                    disabled={addingNote || !newNote.trim()}
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-civic-primary hover:bg-civic-dark disabled:opacity-50 disabled:hover:bg-civic-primary"
+                  >
+                    {addingNote ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Adding...
+                      </span>
+                    ) : (
+                      <span className="flex items-center">
+                        <Send className="-ml-1 mr-2 h-4 w-4" />
+                        Add Note
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Status Timeline</h2>
-            
-            <StatusTimeline events={report.timeline} />
           </div>
         </div>
         
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Update Status</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold">Case Management</h3>
+            </div>
             
-            <div className="space-y-4">
-              <div>
+            <div className="p-4">
+              <div className="mb-4">
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
+                  Case Status
                 </label>
                 <select
                   id="status"
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-civic-primary"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-civic-primary focus:border-transparent"
                 >
                   <option value="new">New</option>
                   <option value="in_review">In Review</option>
@@ -317,97 +380,120 @@ export default function AdminReportDetailPage({ params }) {
                 </select>
               </div>
               
-              <div>
-                <label htmlFor="officer" className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="mb-6">
+                <label htmlFor="assignedOfficer" className="block text-sm font-medium text-gray-700 mb-1">
                   Assigned Officer
                 </label>
                 <select
-                  id="officer"
-                  value={selectedOfficer}
-                  onChange={(e) => setSelectedOfficer(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-civic-primary"
+                  id="assignedOfficer"
+                  value={assignedOfficer}
+                  onChange={(e) => setAssignedOfficer(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-civic-primary focus:border-transparent"
                 >
-                  <option value="">-- Not Assigned --</option>
-                  <option value="SI Suresh Kumar">SI Suresh Kumar</option>
-                  <option value="ASI Rakesh Patel">ASI Rakesh Patel</option>
-                  <option value="HC Amit Singh">HC Amit Singh</option>
-                  <option value="Constable Meera Patel">Constable Meera Patel</option>
+                  <option value="">Not Assigned</option>
+                  {officers.map(officer => (
+                    <option key={officer.id} value={officer.id}>
+                      {officer.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               
-              <div>
-                <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-1">
-                  Status Note
-                </label>
-                <textarea
-                  id="note"
-                  value={statusNote}
-                  onChange={(e) => setStatusNote(e.target.value)}
-                  placeholder="Add a note about this status update..."
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-civic-primary"
-                ></textarea>
-              </div>
-              
               <button
-                onClick={handleStatusUpdate}
-                disabled={isUpdating}
-                className="w-full bg-civic-primary text-white rounded-md py-2 font-medium hover:bg-civic-dark transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+                onClick={handleStatusChange}
+                disabled={updatingStatus || status === report.status}
+                className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-civic-primary hover:bg-civic-dark disabled:opacity-50 disabled:hover:bg-civic-primary"
               >
-                {isUpdating ? (
-                  <>
-                    <Loader className="h-4 w-4 animate-spin" />
-                    <span>Updating...</span>
-                  </>
+                {updatingStatus ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </span>
                 ) : (
-                  <>
-                    <CheckSquare className="h-4 w-4" />
-                    <span>Update Status</span>
-                  </>
+                  <span className="flex items-center">
+                    <Save className="-ml-1 mr-2 h-4 w-4" />
+                    Update Case
+                  </span>
                 )}
               </button>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Reporter Information</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold">Case Timeline</h3>
+            </div>
             
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Phone Number</span>
-                <span className="text-sm font-medium">{report.reportedBy.phone}</span>
+            <div className="p-4">
+              <div className="relative pl-8 pb-8 border-l-2 border-gray-200">
+                <div className="absolute left-0 transform -translate-x-1/2 w-4 h-4 rounded-full bg-green-500"></div>
+                <div className="mb-1">
+                  <span className="text-sm font-semibold text-gray-900">Report Submitted</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {formatDate(report.timestamp)}
+                </div>
               </div>
               
-              <div className="flex justify-center pt-2">
-                <a
-                  href={`tel:${report.reportedBy.phone}`}
-                  className="inline-flex items-center gap-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                  <Phone className="h-4 w-4" />
-                  <span>Call Reporter</span>
-                </a>
+              <div className="relative pl-8 pb-8 border-l-2 border-gray-200">
+                <div className="absolute left-0 transform -translate-x-1/2 w-4 h-4 rounded-full bg-blue-500"></div>
+                <div className="mb-1">
+                  <span className="text-sm font-semibold text-gray-900">Case Review Started</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {formatDate(new Date(new Date(report.timestamp).getTime() + 7200000).toISOString())}
+                </div>
+              </div>
+              
+              <div className="relative pl-8">
+                <div className={`absolute left-0 transform -translate-x-1/2 w-4 h-4 rounded-full ${
+                  report.status === 'resolved' || report.status === 'closed' ? 'bg-green-500' : 'bg-yellow-500'
+                }`}></div>
+                <div className="mb-1">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {report.status === 'resolved' || report.status === 'closed' ? 'Case Resolved' : 'Current Status'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {report.status === 'resolved' || report.status === 'closed' 
+                    ? formatDate(new Date(new Date(report.timestamp).getTime() + 259200000).toISOString())
+                    : 'In progress'
+                  }
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Report Actions</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold">Quick Actions</h3>
+            </div>
             
-            <div className="space-y-2">
-              <button className="w-full flex items-center justify-center gap-2 p-2 bg-gray-50 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
-                <MessageSquare className="h-4 w-4" />
-                <span>Add Comment</span>
-              </button>
-              
-              <button className="w-full flex items-center justify-center gap-2 p-2 bg-gray-50 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
-                <Download className="h-4 w-4" />
-                <span>Download Report</span>
-              </button>
-              
-              <button className="w-full flex items-center justify-center gap-2 p-2 bg-gray-50 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
-                <FileText className="h-4 w-4" />
-                <span>Generate FIR</span>
-              </button>
+            <div className="p-4">
+              <div className="space-y-2">
+                <button className="w-full text-left py-2 px-3 flex items-center rounded-md hover:bg-gray-50 transition-colors">
+                  <User className="h-5 w-5 text-gray-500 mr-2" />
+                  <span>Contact Reporter</span>
+                </button>
+                
+                <button className="w-full text-left py-2 px-3 flex items-center rounded-md hover:bg-gray-50 transition-colors">
+                  <MapPin className="h-5 w-5 text-gray-500 mr-2" />
+                  <span>View Location on Map</span>
+                </button>
+                
+                <button className="w-full text-left py-2 px-3 flex items-center rounded-md hover:bg-gray-50 transition-colors">
+                  <Check className="h-5 w-5 text-green-500 mr-2" />
+                  <span className="text-green-600">Mark as Resolved</span>
+                </button>
+                
+                <button className="w-full text-left py-2 px-3 flex items-center rounded-md hover:bg-gray-50 transition-colors">
+                  <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
+                  <span className="text-red-600">Flag as Priority</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

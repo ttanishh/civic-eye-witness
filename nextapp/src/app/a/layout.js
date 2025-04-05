@@ -6,23 +6,25 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Shield, 
+  LayoutDashboard, 
   FileText, 
-  User, 
+  BarChart2, 
   LogOut, 
   Menu,
   X,
-  Bell
+  Bell,
+  User
 } from 'lucide-react';
 
-export default function UserLayout({ children }) {
+export default function AdminLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   
   // Navigation items
   const navigation = [
-    { name: 'My Reports', href: '/u/reports', icon: FileText },
-    { name: 'New Report', href: '/u/reports/new', icon: FileText },
-    { name: 'Profile', href: '/u/profile', icon: User },
+    { name: 'Dashboard', href: '/a/dashboard', icon: LayoutDashboard },
+    { name: 'Reports', href: '/a/reports', icon: FileText },
+    { name: 'Analytics', href: '/a/analytics', icon: BarChart2 },
   ];
   
   const handleSignOut = () => {
@@ -36,10 +38,10 @@ export default function UserLayout({ children }) {
         <div className="mx-auto px-4">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-2">
-              <Link href="/">
+              <Link href="/a/dashboard">
                 <Shield className="h-6 w-6 text-civic-primary" />
               </Link>
-              <h1 className="text-xl font-bold text-civic-primary">KAVACH</h1>
+              <h1 className="text-xl font-bold text-civic-primary">KAVACH ADMIN</h1>
             </div>
             
             {/* Mobile menu button */}
@@ -57,7 +59,7 @@ export default function UserLayout({ children }) {
                   key={item.name}
                   href={item.href}
                   className={`flex items-center gap-1 text-sm font-medium ${
-                    pathname === item.href 
+                    pathname === item.href || pathname.startsWith(item.href + '/')
                       ? 'text-civic-primary' 
                       : 'text-gray-600 hover:text-civic-primary'
                   }`}
@@ -71,6 +73,11 @@ export default function UserLayout({ children }) {
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
               </button>
+              
+              <div className="flex items-center gap-1 text-gray-600 pr-2 border-r">
+                <User className="h-4 w-4" />
+                <span className="text-sm font-medium">Station Officer</span>
+              </div>
               
               <button 
                 onClick={handleSignOut}
@@ -93,7 +100,7 @@ export default function UserLayout({ children }) {
                 key={item.name}
                 href={item.href}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md ${
-                  pathname === item.href 
+                  pathname === item.href || pathname.startsWith(item.href + '/')
                     ? 'bg-civic-light text-civic-primary' 
                     : 'hover:bg-gray-50'
                 }`}
@@ -103,6 +110,11 @@ export default function UserLayout({ children }) {
                 <span>{item.name}</span>
               </Link>
             ))}
+            
+            <div className="flex items-center gap-2 px-3 py-2">
+              <User className="h-5 w-5" />
+              <span>Station Officer</span>
+            </div>
             
             <button 
               onClick={handleSignOut}
@@ -122,7 +134,6 @@ export default function UserLayout({ children }) {
       <footer className="bg-white border-t border-gray-200 py-6">
         <div className="container mx-auto px-4 text-center text-gray-600 text-sm">
           <p>&copy; {new Date().getFullYear()} KAVACH - Gujarat Police. All rights reserved.</p>
-          <p className="mt-1">Powered by blockchain technology for your privacy and security.</p>
         </div>
       </footer>
     </div>

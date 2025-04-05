@@ -1,6 +1,6 @@
 
 import Link from 'next/link'
-import { Shield, FileText, BarChart3, Phone } from 'lucide-react'
+import { Shield, FileText, BarChart3, Phone, MapPin, Bell, Lock } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -13,9 +13,9 @@ export default function Home() {
           </div>
           <nav>
             <ul className="flex space-x-6">
-              <li><Link href="/auth" className="text-gray-600 hover:text-civic-primary">Login</Link></li>
-              <li><Link href="/about" className="text-gray-600 hover:text-civic-primary">About</Link></li>
-              <li><Link href="/help" className="text-gray-600 hover:text-civic-primary">Help</Link></li>
+              <li><Link href="/auth/login" className="text-gray-600 hover:text-civic-primary">Login</Link></li>
+              <li><Link href="/auth/signup" className="text-gray-600 hover:text-civic-primary">Register</Link></li>
+              <li><Link href="/auth/emergency" className="text-red-600 hover:text-red-700 font-medium">Emergency Report</Link></li>
             </ul>
           </nav>
         </div>
@@ -34,16 +34,16 @@ export default function Home() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link 
-                    href="/auth" 
+                    href="/auth/login" 
                     className="px-6 py-3 bg-civic-primary text-white rounded-md text-center font-medium hover:bg-civic-dark transition-colors"
                   >
                     Report a Crime
                   </Link>
                   <Link 
-                    href="/dashboard" 
-                    className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-md text-center font-medium hover:bg-gray-50 transition-colors"
+                    href="/auth/emergency" 
+                    className="px-6 py-3 bg-red-600 border border-red-600 text-white rounded-md text-center font-medium hover:bg-red-700 transition-colors"
                   >
-                    View Dashboard
+                    Emergency Help
                   </Link>
                 </div>
               </div>
@@ -78,21 +78,21 @@ export default function Home() {
               
               <div className="bg-white p-6 rounded-lg shadow-md text-center">
                 <div className="w-16 h-16 bg-civic-light rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="h-8 w-8 text-civic-primary" />
+                  <MapPin className="h-8 w-8 text-civic-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Submit Reports</h3>
+                <h3 className="text-xl font-semibold mb-2">Location Tracking</h3>
                 <p className="text-gray-600">
-                  Provide details of incidents with optional evidence. All data is securely stored on the blockchain.
+                  Pin-point accurate location reporting with our integrated map system for quick response coordination.
                 </p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-md text-center">
                 <div className="w-16 h-16 bg-civic-light rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BarChart3 className="h-8 w-8 text-civic-primary" />
+                  <Bell className="h-8 w-8 text-civic-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Track Progress</h3>
+                <h3 className="text-xl font-semibold mb-2">Real-time Updates</h3>
                 <p className="text-gray-600">
-                  Follow the status of your reports as they move through investigation and resolution.
+                  Follow the status of your reports in real-time as they move through investigation and resolution.
                 </p>
               </div>
             </div>
@@ -107,12 +107,12 @@ export default function Home() {
                 <p className="text-lg mb-8">
                   KAVACH uses decentralized blockchain technology to ensure that your reports cannot be tampered with or deleted, while still protecting your personal information.
                 </p>
-                <Link 
-                  href="/about" 
-                  className="px-6 py-3 bg-white text-civic-primary rounded-md inline-block font-medium hover:bg-opacity-90 transition-colors"
-                >
-                  Learn More
-                </Link>
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-2 bg-white/10 px-4 py-3 rounded-lg">
+                    <Lock className="h-5 w-5" />
+                    <span>End-to-end encrypted for your privacy</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -134,29 +134,29 @@ export default function Home() {
             <div>
               <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
               <ul className="space-y-2">
-                <li><Link href="/auth" className="text-gray-300 hover:text-white">Report Crime</Link></li>
-                <li><Link href="/dashboard" className="text-gray-300 hover:text-white">Dashboard</Link></li>
-                <li><Link href="/statistics" className="text-gray-300 hover:text-white">Statistics</Link></li>
+                <li><Link href="/auth/login" className="text-gray-300 hover:text-white">Report Crime</Link></li>
+                <li><Link href="/auth/emergency" className="text-gray-300 hover:text-white">Emergency</Link></li>
+                <li><Link href="/auth/signup" className="text-gray-300 hover:text-white">Register</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-lg mb-4">Resources</h4>
               <ul className="space-y-2">
-                <li><Link href="/about" className="text-gray-300 hover:text-white">About</Link></li>
-                <li><Link href="/help" className="text-gray-300 hover:text-white">Help Center</Link></li>
-                <li><Link href="/privacy" className="text-gray-300 hover:text-white">Privacy Policy</Link></li>
+                <li><Link href="#" className="text-gray-300 hover:text-white">About</Link></li>
+                <li><Link href="#" className="text-gray-300 hover:text-white">Help Center</Link></li>
+                <li><Link href="#" className="text-gray-300 hover:text-white">Privacy Policy</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-lg mb-4">Emergency</h4>
               <p className="text-gray-300 mb-2">
-                For immediate assistance, please contact your local emergency services.
+                For immediate assistance, please contact Gujarat Police Emergency Services.
               </p>
-              <p className="font-bold">Emergency: 911</p>
+              <p className="font-bold">Emergency: 112</p>
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; {new Date().getFullYear()} KAVACH. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} KAVACH - Gujarat Police. All rights reserved.</p>
           </div>
         </div>
       </footer>

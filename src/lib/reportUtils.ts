@@ -8,6 +8,7 @@ let mockReports: Report[] = [
     id: "1",
     title: "Suspicious activity near downtown park",
     description: "I witnessed several individuals behaving suspiciously around the playground equipment at Central Park around 10pm. They appeared to be exchanging packages.",
+    category: "other", // Added the required category field
     location: {
       latitude: 40.785091,
       longitude: -73.968285,
@@ -21,6 +22,7 @@ let mockReports: Report[] = [
     id: "2",
     title: "Hit and run incident on Main St",
     description: "A blue sedan hit a parked car and drove away without stopping. License plate partially visible, started with AB3.",
+    category: "other", // Added the required category field
     location: {
       latitude: 40.712776,
       longitude: -74.005974,
@@ -34,6 +36,7 @@ let mockReports: Report[] = [
     id: "3",
     title: "Graffiti on public building",
     description: "New graffiti appeared overnight on the east wall of the public library. Tags appear to be gang-related.",
+    category: "vandalism", // Added the required category field
     location: {
       latitude: 40.730610,
       longitude: -73.935242,

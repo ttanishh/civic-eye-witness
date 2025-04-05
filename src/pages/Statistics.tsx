@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,13 +31,14 @@ export default function Statistics() {
     { name: "Resolved", value: reports.filter(r => r.status === "resolved").length }
   ];
 
+  // Define crime categories as an array to use for mapping
+  const crimeCategories: CrimeCategory[] = ["theft", "assault", "vandalism", "fraud", "harassment", "other"];
+
   // Crime category statistics
-  const categoryData = Object.values(CrimeCategory)
-    .filter(value => typeof value === 'string')
-    .map(category => ({
-      name: category.charAt(0).toUpperCase() + category.slice(1),
-      value: reports.filter(r => r.category === category).length || 0
-    }));
+  const categoryData = crimeCategories.map(category => ({
+    name: category.charAt(0).toUpperCase() + category.slice(1),
+    value: reports.filter(r => r.category === category).length || 0
+  }));
 
   // Time-based statistics (last 7 days)
   const now = new Date();

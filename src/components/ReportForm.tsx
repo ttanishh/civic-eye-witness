@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AlertTriangle, Loader2, MapPin, Upload, Plus, X, Shield } from "lucide-react";
 import { mockSubmitReport } from "@/lib/reportUtils";
-import { CrimeCategory, Location } from "@/types/report";
+import { CrimeCategory, Location, Witness as ReportWitness, Evidence as ReportEvidence } from "@/types/report";
 
 interface Witness {
+  id: string;
   description: string;
   contactHash?: string;
 }
@@ -46,12 +46,10 @@ export function ReportForm() {
     
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        // In a real app, we would use a service like Google Maps API to reverse geocode
-        // For now, we'll just set the coordinates
         const newLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-          address: "Your current location" // In production, this would come from reverse geocoding
+          address: "Your current location"
         };
         
         setLocation(newLocation);
@@ -73,7 +71,10 @@ export function ReportForm() {
   const addWitness = () => {
     if (!newWitness.trim()) return;
     
-    setWitnesses([...witnesses, { description: newWitness }]);
+    setWitnesses([...witnesses, { 
+      id: `witness-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
+      description: newWitness 
+    }]);
     setNewWitness("");
     
     toast.success("Witness added", {
@@ -117,8 +118,6 @@ export function ReportForm() {
     setIsSubmitting(true);
     
     try {
-      // In a real app, this would call our blockchain functions
-      // For now, we'll use a mock function
       const result = await mockSubmitReport({
         title,
         description,
@@ -138,7 +137,6 @@ export function ReportForm() {
         description: "Your report has been recorded on the blockchain."
       });
       
-      // Reset form
       setTitle("");
       setDescription("");
       setCategory("other");

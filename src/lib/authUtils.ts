@@ -46,3 +46,8 @@ export const logOut = (): void => {
   localStorage.removeItem(LOCAL_STORAGE_KEY);
   window.location.href = "/";
 };
+
+// Added this function to match the import in Layout.tsx
+export const removeAuthInfo = (): void => {
+  localStorage.removeItem(LOCAL_STORAGE_KEY);
+};

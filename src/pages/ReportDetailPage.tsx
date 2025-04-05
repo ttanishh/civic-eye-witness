@@ -1,279 +1,253 @@
+
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getReportFromBlockchain } from "@/lib/contractInterface";
+import { 
+  ArrowLeft, 
+  Clock, 
+  MapPin, 
+  FileText, 
+  User,
+  Shield,
+  Tag,
+  AlertTriangle
+} from "lucide-react";
+import { getReportById } from "@/lib/reportUtils";
 import { Report } from "@/types/report";
-import { format } from "date-fns";
-import { ArrowLeft, Calendar, MapPin, FileText, Layers, FileCode } from "lucide-react";
+import { ReportVerification } from "@/components/ReportVerification";
+import { ReportEvidence } from "@/components/ReportEvidence";
 
 export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [report, setReport] = useState<Report | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const loadReport = async () => {
+    const fetchReport = async () => {
       if (!id) return;
       
-      setIsLoading(true);
       try {
-        const reportData = await getReportFromBlockchain(id);
+        const reportData = await getReportById(id);
         setReport(reportData);
       } catch (error) {
-        console.error("Error loading report:", error);
+        console.error("Error fetching report:", error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    
-    loadReport();
+
+    fetchReport();
   }, [id]);
-  
-  const renderStatusBadge = (status: string) => {
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return <span className="status-badge-pending">Pending Review</span>;
+        return "bg-yellow-500";
       case "investigating":
-        return <span className="status-badge-investigating">Investigating</span>;
+        return "bg-blue-500";
       case "resolved":
-        return <span className="status-badge-resolved">Resolved</span>;
+        return "bg-green-500";
       default:
-        return null;
+        return "bg-gray-500";
     }
   };
-  
-  if (isLoading) {
+
+  const getUrgencyLabel = (level?: number) => {
+    if (!level) return "Medium";
+    
+    switch (level) {
+      case 1: return "Very Low";
+      case 2: return "Low";
+      case 3: return "Medium";
+      case 4: return "High";
+      case 5: return "Critical";
+      default: return "Medium";
+    }
+  };
+
+  const getUrgencyColor = (level?: number) => {
+    if (!level) return "bg-yellow-500";
+    
+    switch (level) {
+      case 1: return "bg-green-300";
+      case 2: return "bg-green-500";
+      case 3: return "bg-yellow-500";
+      case 4: return "bg-orange-500";
+      case 5: return "bg-red-500";
+      default: return "bg-yellow-500";
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <div className="animate-pulse-fade">Loading report details...</div>
+      <div className="max-w-4xl mx-auto p-4 animate-pulse">
+        <div className="h-8 w-1/4 bg-muted rounded mb-6"></div>
+        <div className="bg-card rounded-xl p-6 mb-6">
+          <div className="h-8 w-3/4 bg-muted rounded mb-4"></div>
+          <div className="h-4 w-1/4 bg-muted rounded mb-8"></div>
+          <div className="h-24 bg-muted rounded mb-4"></div>
+          <div className="flex gap-2 mb-2">
+            <div className="h-6 w-20 bg-muted rounded"></div>
+            <div className="h-6 w-20 bg-muted rounded"></div>
+          </div>
+        </div>
       </div>
     );
   }
-  
+
   if (!report) {
     return (
-      <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-4">
-        <h1 className="text-2xl font-bold mb-4">Report Not Found</h1>
-        <p className="text-muted-foreground mb-6">
-          The report you're looking for could not be found.
-        </p>
-        <Button onClick={() => navigate("/dashboard")}>
-          Return to Dashboard
-        </Button>
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-red-700 mb-2">Report Not Found</h2>
+          <p className="text-red-600 mb-4">The report you're looking for could not be found or has been removed.</p>
+          <Button asChild>
+            <Link to="/dashboard">Return to Dashboard</Link>
+          </Button>
+        </div>
       </div>
     );
   }
-  
+
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="bg-civic-primary p-4 shadow-md">
-        <div className="container mx-auto">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="text-white hover:text-white hover:bg-civic-dark/20"
-            onClick={() => navigate("/dashboard")}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="max-w-4xl mx-auto p-4">
+      <div className="mb-6">
+        <Button variant="outline" asChild className="mb-4">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
-          </Button>
+          </Link>
+        </Button>
+        
+        <h1 className="text-2xl font-bold mb-2">{report.title}</h1>
+        
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Badge variant="outline" className={`${getStatusColor(report.status)} text-white`}>
+            {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+          </Badge>
+          
+          <Badge variant="outline" className={`${getUrgencyColor(report.urgencyLevel)} text-white`}>
+            Urgency: {getUrgencyLabel(report.urgencyLevel)}
+          </Badge>
+          
+          <Badge variant="outline" className="bg-civic-primary text-white">
+            {report.category.charAt(0).toUpperCase() + report.category.slice(1)}
+          </Badge>
         </div>
-      </header>
+      </div>
       
-      <main className="container mx-auto p-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">{report.title}</h1>
-              <div className="flex items-center gap-2 mt-2 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {format(new Date(report.timestamp), "PPP 'at' p")}
-                </span>
-              </div>
-            </div>
-            {renderStatusBadge(report.status)}
-          </div>
-          
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Description</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-line">{report.description}</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Location</CardTitle>
-            </CardHeader>
-            <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Card className="overflow-hidden bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+            <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-civic-primary" />
-                <span>
-                  {report.location.address || `${report.location.latitude.toFixed(4)}, ${report.location.longitude.toFixed(4)}`}
-                </span>
+                <FileText className="h-5 w-5 text-civic-primary" />
+                <CardTitle className="text-lg">Report Details</CardTitle>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="prose max-w-none">
+                <p className="text-muted-foreground whitespace-pre-line">{report.description}</p>
               </div>
               
-              <div className="mt-4 h-64 bg-muted rounded-md overflow-hidden">
-                {/* In a real app, this would be a map component */}
-                <div className="h-full flex items-center justify-center">
-                  <p className="text-muted-foreground">Map view would be displayed here</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Blockchain Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {report.transactionHash ? (
-                  <div className="flex items-start gap-3">
-                    <FileText className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Transaction Hash</p>
-                      <p className="text-sm font-mono break-all">{report.transactionHash}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        This is the unique identifier for the blockchain transaction that recorded this report.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-3">
-                    <FileText className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Transaction Hash</p>
-                      <p className="text-sm font-mono">tx-hash-{Date.now()} (Simulated)</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        In production, this would be the actual transaction hash from Ethereum.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {report.blockNumber ? (
-                  <div className="flex items-start gap-3">
-                    <Layers className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Block Number</p>
-                      <p className="text-sm font-mono">{report.blockNumber}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        The block number where this report was confirmed on the blockchain.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-3">
-                    <Layers className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Block Number</p>
-                      <p className="text-sm font-mono">{Math.floor(Math.random() * 10000000) + 1000000} (Simulated)</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        In production, this would be the actual block number from Ethereum.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {report.ipfsHash ? (
-                  <div className="flex items-start gap-3">
-                    <FileCode className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">IPFS Hash</p>
-                      <p className="text-sm font-mono break-all">{report.ipfsHash}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Additional report details are stored on IPFS with this content identifier.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-3">
-                    <FileCode className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">IPFS Hash</p>
-                      <p className="text-sm font-mono">ipfs-hash-{Date.now()}-{Math.random().toString(36).substring(2, 8)} (Simulated)</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        In production, this would be the actual IPFS hash where detailed report data is stored.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-3">
-                  <FileCode className="h-5 w-5 text-civic-primary flex-shrink-0 mt-0.5" />
+              <Separator className="my-4" />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-start gap-2">
+                  <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="font-medium">Smart Contract</p>
-                    <p className="text-sm font-mono break-all">{report.contractAddress || "0x1234...5678 (Simulated)"}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      The address of the smart contract that stores this report on the blockchain.
+                    <p className="text-sm font-medium">Reported on</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(report.timestamp).toLocaleString()}
                     </p>
                   </div>
                 </div>
-
-                <div className="bg-muted p-3 rounded-md mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    This report is stored on a decentralized blockchain, making it immutable and tamper-proof.
-                    Data related to the report is split between the blockchain (for verification) and IPFS
-                    (for detailed content), ensuring both transparency and privacy.
-                  </p>
+                
+                <div className="flex items-start gap-2">
+                  <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium">Reporter ID</p>
+                    <p className="text-sm text-muted-foreground">
+                      {report.reporter}
+                    </p>
+                  </div>
                 </div>
+                
+                <div className="flex items-start gap-2 sm:col-span-2">
+                  <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium">Location</p>
+                    <p className="text-sm text-muted-foreground">
+                      {report.location.address || 'No address provided'} 
+                      <span className="text-xs ml-1">
+                        ({report.location.latitude.toFixed(6)}, {report.location.longitude.toFixed(6)})
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                
+                {report.witnesses && report.witnesses.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <p className="text-sm font-medium mb-2">Witnesses</p>
+                    <div className="space-y-2">
+                      {report.witnesses.map((witness, index) => (
+                        <div key={index} className="bg-muted/30 p-2 rounded-md text-sm">
+                          {witness.description}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Status Updates</CardTitle>
+          <ReportEvidence evidence={report.evidence} />
+        </div>
+        
+        <div className="space-y-6">
+          <ReportVerification reportId={report.id} />
+          
+          <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <Tag className="h-5 w-5 text-civic-primary" />
+                <CardTitle className="text-lg">Tags</CardTitle>
+              </div>
             </CardHeader>
+            
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 rounded-full bg-civic-success mt-2"></div>
-                  <div>
-                    <p className="font-medium">Report Submitted</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(report.timestamp), "PPP 'at' p")}
-                    </p>
-                  </div>
-                </div>
-                
-                {report.status !== "pending" && (
-                  <div className="flex gap-3">
-                    <div className="w-2 h-2 rounded-full bg-civic-primary mt-2"></div>
-                    <div>
-                      <p className="font-medium">Status Changed to Investigating</p>
-                      <p className="text-sm text-muted-foreground">
-                        {/* In a real app, this would be the actual timestamp */}
-                        {format(new Date(new Date(report.timestamp).getTime() + 86400000), "PPP 'at' p")}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                {report.status === "resolved" && (
-                  <div className="flex gap-3">
-                    <div className="w-2 h-2 rounded-full bg-civic-success mt-2"></div>
-                    <div>
-                      <p className="font-medium">Case Resolved</p>
-                      <p className="text-sm text-muted-foreground">
-                        {/* In a real app, this would be the actual timestamp */}
-                        {format(new Date(new Date(report.timestamp).getTime() + 172800000), "PPP 'at' p")}
-                      </p>
-                    </div>
-                  </div>
-                )}
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">#{report.category}</Badge>
+                <Badge variant="secondary">#{report.status}</Badge>
+                <Badge variant="secondary">#evidence-{report.evidence?.length || 0}</Badge>
+                <Badge variant="secondary">#witnesses-{report.witnesses?.length || 0}</Badge>
               </div>
             </CardContent>
           </Card>
+          
+          <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-civic-primary" />
+                <CardTitle className="text-lg">Privacy Notice</CardTitle>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                This report is securely stored on the blockchain. Personal identifiers are hashed to protect privacy. 
+                The report's contents and evidence are cryptographically verified to ensure authenticity.
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

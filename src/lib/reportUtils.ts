@@ -8,7 +8,7 @@ let mockReports: Report[] = [
     id: "1",
     title: "Suspicious activity near downtown park",
     description: "I witnessed several individuals behaving suspiciously around the playground equipment at Central Park around 10pm. They appeared to be exchanging packages.",
-    category: "other", // Added the required category field
+    category: "other",
     location: {
       latitude: 40.785091,
       longitude: -73.968285,
@@ -16,13 +16,28 @@ let mockReports: Report[] = [
     },
     timestamp: "2023-04-01T22:15:00Z",
     status: "investigating",
-    reporter: "anon-user-1"
+    reporter: "anon-user-1",
+    urgencyLevel: 4,
+    evidence: [
+      {
+        type: "image",
+        description: "Photo of individuals near playground",
+        ipfsHash: "ipfs-hash-1649",
+        timestamp: "2023-04-01T22:16:00Z"
+      }
+    ],
+    witnesses: [
+      {
+        id: "witness-1",
+        description: "Park security guard who was nearby"
+      }
+    ]
   },
   {
     id: "2",
     title: "Hit and run incident on Main St",
     description: "A blue sedan hit a parked car and drove away without stopping. License plate partially visible, started with AB3.",
-    category: "other", // Added the required category field
+    category: "other",
     location: {
       latitude: 40.712776,
       longitude: -74.005974,
@@ -30,13 +45,22 @@ let mockReports: Report[] = [
     },
     timestamp: "2023-04-02T14:30:00Z",
     status: "pending",
-    reporter: "anon-user-2"
+    reporter: "anon-user-2",
+    urgencyLevel: 3,
+    evidence: [
+      {
+        type: "image",
+        description: "Photo of damage to the parked car",
+        ipfsHash: "ipfs-hash-2957",
+        timestamp: "2023-04-02T14:35:00Z"
+      }
+    ]
   },
   {
     id: "3",
     title: "Graffiti on public building",
     description: "New graffiti appeared overnight on the east wall of the public library. Tags appear to be gang-related.",
-    category: "vandalism", // Added the required category field
+    category: "vandalism",
     location: {
       latitude: 40.730610,
       longitude: -73.935242,
@@ -44,7 +68,72 @@ let mockReports: Report[] = [
     },
     timestamp: "2023-04-03T08:45:00Z",
     status: "resolved",
-    reporter: "anon-user-1"
+    reporter: "anon-user-1",
+    urgencyLevel: 2,
+    evidence: [
+      {
+        type: "image",
+        description: "Photo of graffiti on wall",
+        ipfsHash: "ipfs-hash-3451",
+        timestamp: "2023-04-03T08:50:00Z"
+      }
+    ]
+  },
+  {
+    id: "4",
+    title: "Theft from convenience store",
+    description: "Two individuals entered the store, distracted the clerk, and stole several items before fleeing on foot.",
+    category: "theft",
+    location: {
+      latitude: 40.741895,
+      longitude: -73.989308,
+      address: "QuickMart, 45 Park Ave, Manhattan"
+    },
+    timestamp: "2023-04-04T19:20:00Z",
+    status: "investigating",
+    reporter: "anon-user-3",
+    urgencyLevel: 3,
+    evidence: [
+      {
+        type: "video",
+        description: "Store security camera footage",
+        ipfsHash: "ipfs-hash-4267",
+        timestamp: "2023-04-04T19:30:00Z"
+      }
+    ],
+    witnesses: [
+      {
+        id: "witness-2",
+        description: "Store clerk on duty"
+      },
+      {
+        id: "witness-3",
+        description: "Customer who was in the store"
+      }
+    ]
+  },
+  {
+    id: "5",
+    title: "Fraud attempt via phone scam",
+    description: "Someone claiming to be from the IRS called demanding payment via gift cards. They had some of my personal information.",
+    category: "fraud",
+    location: {
+      latitude: 40.758896,
+      longitude: -73.985130,
+      address: "Residential area, Upper East Side"
+    },
+    timestamp: "2023-04-05T10:15:00Z",
+    status: "pending",
+    reporter: "anon-user-4",
+    urgencyLevel: 2,
+    evidence: [
+      {
+        type: "audio",
+        description: "Recording of the phone call",
+        ipfsHash: "ipfs-hash-5823",
+        timestamp: "2023-04-05T10:20:00Z"
+      }
+    ]
   }
 ];
 

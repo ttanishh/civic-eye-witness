@@ -1,34 +1,77 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { 
+  BarChart, 
+  Bar, 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Legend,
+  LineChart,
+  Line,
+  CartesianGrid
+} from "recharts";
 import { getReports } from "@/lib/reportUtils";
-import { Report, ReportStatus, CrimeCategory } from "@/types/report";
+import { getCrimeStatisticsFromBlockchain } from "@/lib/contractInterface";
+import { Report, CrimeCategory } from "@/types/report";
+import { 
+  AlertTriangle, 
+  BarChart3, 
+  ChartPie, 
+  TrendingUp,
+  MapPin,
+  Info,
+  Shield
+} from "lucide-react";
 
 export default function Statistics() {
   const [reports, setReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<{
+    totalReports: number;
+    byCategoryCount: Record<CrimeCategory, number>;
+    byStatusCount: Record<string, number>;
+    byUrgencyCount: Record<number, number>;
+  } | null>(null);
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
         const allReports = await getReports();
         setReports(allReports);
+        
+        const statistics = await getCrimeStatisticsFromBlockchain();
+        setStats(statistics);
       } catch (error) {
-        console.error("Error fetching reports:", error);
+        console.error("Error fetching statistics:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchReports();
+    fetchData();
   }, []);
 
+  // Define colors for charts
+  const COLORS = [
+    "#8884d8", "#83a6ed", "#8dd1e1", "#82ca9d", "#a4de6c", "#d0ed57",
+    "#ffc658", "#ff8042", "#ff6b6b", "#e57373", "#ba68c8", "#9575cd"
+  ];
+  
   // Status statistics
   const statusData = [
-    { name: "Pending", value: reports.filter(r => r.status === "pending").length },
-    { name: "Investigating", value: reports.filter(r => r.status === "investigating").length },
-    { name: "Resolved", value: reports.filter(r => r.status === "resolved").length }
+    { name: "Pending", value: stats?.byStatusCount?.pending || 0 },
+    { name: "Investigating", value: stats?.byStatusCount?.investigating || 0 },
+    { name: "Resolved", value: stats?.byStatusCount?.resolved || 0 }
   ];
 
   // Define crime categories as an array to use for mapping
@@ -37,152 +80,218 @@ export default function Statistics() {
   // Crime category statistics
   const categoryData = crimeCategories.map(category => ({
     name: category.charAt(0).toUpperCase() + category.slice(1),
-    value: reports.filter(r => r.category === category).length || 0
+    value: stats?.byCategoryCount?.[category] || 0
   }));
+
+  // Urgency level statistics
+  const urgencyData = [
+    { name: "Very Low", value: stats?.byUrgencyCount?.[1] || 0 },
+    { name: "Low", value: stats?.byUrgencyCount?.[2] || 0 },
+    { name: "Medium", value: stats?.byUrgencyCount?.[3] || 0 },
+    { name: "High", value: stats?.byUrgencyCount?.[4] || 0 },
+    { name: "Critical", value: stats?.byUrgencyCount?.[5] || 0 }
+  ];
 
   // Time-based statistics (last 7 days)
   const now = new Date();
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  
-  const timeData = Array.from({ length:
- 7 }, (_, i) => {
-    const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    const dateString = date.toLocaleDateString();
+  const timeData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(now);
+    date.setDate(now.getDate() - (6 - i));
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    // Count reports for this day
     const count = reports.filter(r => {
       const reportDate = new Date(r.timestamp);
-      return reportDate.toLocaleDateString() === dateString;
+      return reportDate.getDate() === date.getDate() &&
+             reportDate.getMonth() === date.getMonth() &&
+             reportDate.getFullYear() === date.getFullYear();
     }).length;
     
-    return {
-      name: dateString,
-      value: count
-    };
-  }).reverse();
+    return { name: dateStr, count };
+  });
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse-fade">Loading statistics...</div>
+      <div className="container mx-auto p-4 space-y-8 animate-pulse">
+        <div className="h-8 w-60 bg-muted rounded mb-6"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="h-40 bg-muted rounded"></div>
+          <div className="h-40 bg-muted rounded"></div>
+          <div className="h-40 bg-muted rounded"></div>
+        </div>
+        <div className="h-80 bg-muted rounded mt-6"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">KAVACH Statistics</h1>
-        <p className="text-muted-foreground mt-2">
-          Crime reporting analytics and insights
+    <div className="container mx-auto p-4 space-y-8">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2">KAVACH Analytics Dashboard</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Real-time statistics and insights from crime reports across the blockchain network
         </p>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      
+      {/* Stats Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
           <CardHeader className="pb-2">
-            <CardTitle>Total Reports</CardTitle>
-            <CardDescription>All time</CardDescription>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Shield className="h-5 w-5 text-civic-primary" />
+              Total Reports
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-civic-primary">{reports.length}</div>
+            <div className="text-3xl font-bold">{stats?.totalReports || 0}</div>
+            <p className="text-muted-foreground text-sm">Reports submitted to the KAVACH network</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
           <CardHeader className="pb-2">
-            <CardTitle>Active Investigations</CardTitle>
-            <CardDescription>Currently in progress</CardDescription>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Info className="h-5 w-5 text-blue-500" />
+              Pending
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-civic-secondary">
-              {reports.filter(r => r.status === "investigating").length}
-            </div>
+            <div className="text-3xl font-bold text-blue-500">{stats?.byStatusCount?.pending || 0}</div>
+            <p className="text-muted-foreground text-sm">Reports awaiting review</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
           <CardHeader className="pb-2">
-            <CardTitle>Resolution Rate</CardTitle>
-            <CardDescription>Percentage of resolved cases</CardDescription>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Investigating
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-civic-success">
-              {reports.length > 0 
-                ? Math.round((reports.filter(r => r.status === "resolved").length / reports.length) * 100) 
-                : 0}%
-            </div>
+            <div className="text-3xl font-bold text-amber-500">{stats?.byStatusCount?.investigating || 0}</div>
+            <p className="text-muted-foreground text-sm">Reports under active investigation</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Shield className="h-5 w-5 text-green-500" />
+              Resolved
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-green-500">{stats?.byStatusCount?.resolved || 0}</div>
+            <p className="text-muted-foreground text-sm">Reports successfully resolved</p>
           </CardContent>
         </Card>
       </div>
-
-      <Tabs defaultValue="status">
-        <TabsList className="mb-4">
-          <TabsTrigger value="status">Status</TabsTrigger>
-          <TabsTrigger value="category">Categories</TabsTrigger>
-          <TabsTrigger value="time">Timeline</TabsTrigger>
+      
+      {/* Charts */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="flex items-center gap-2">
+            <ChartPie className="h-4 w-4" />
+            Categories
+          </TabsTrigger>
+          <TabsTrigger value="trends" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Trends
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="status" className="mt-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports by Status</CardTitle>
-              <CardDescription>
-                Distribution of reports across different statuses
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
+        <TabsContent value="overview" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="overflow-hidden bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+              <CardHeader>
+                <CardTitle>Report Status Distribution</CardTitle>
+                <CardDescription>
+                  Breakdown of reports by current status
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="h-80 p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={statusData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="overflow-hidden bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+              <CardHeader>
+                <CardTitle>Urgency Level Distribution</CardTitle>
+                <CardDescription>
+                  Breakdown of reports by reported urgency level
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="h-80 p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={urgencyData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
-                      {statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" name="Reports" fill="#8884d8">
+                        {urgencyData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
-        <TabsContent value="category" className="mt-0">
-          <Card>
+        <TabsContent value="categories" className="mt-6">
+          <Card className="overflow-hidden bg-white/50 backdrop-blur-sm border border-civic-primary/20">
             <CardHeader>
-              <CardTitle>Reports by Category</CardTitle>
+              <CardTitle>Crime Categories</CardTitle>
               <CardDescription>
-                Distribution of reports across different crime categories
+                Distribution of reports by crime category
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={categoryData}
-                    margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
+                    layout="vertical"
+                    margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
                   >
-                    <XAxis dataKey="name" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" />
                     <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" fill="#8884d8">
+                    <Bar dataKey="value" name="Reports" fill="#8884d8">
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
@@ -192,40 +301,98 @@ export default function Statistics() {
               </div>
             </CardContent>
           </Card>
+          
+          <Alert className="mt-6 bg-civic-light border-civic-primary/20">
+            <MapPin className="h-4 w-4" />
+            <AlertTitle>Geographic Insights</AlertTitle>
+            <AlertDescription>
+              Geographic crime distribution data will be available in future releases of the KAVACH platform. 
+              This will help identify crime hotspots and enhance community safety initiatives.
+            </AlertDescription>
+          </Alert>
         </TabsContent>
         
-        <TabsContent value="time" className="mt-0">
-          <Card>
+        <TabsContent value="trends" className="mt-6">
+          <Card className="overflow-hidden bg-white/50 backdrop-blur-sm border border-civic-primary/20">
             <CardHeader>
-              <CardTitle>Reports Timeline</CardTitle>
+              <CardTitle>Reports Trend (Last 7 Days)</CardTitle>
               <CardDescription>
-                Number of reports submitted over the past 7 days
+                Daily report submission activity
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
+                  <LineChart
                     data={timeData}
-                    margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                     <XAxis dataKey="name" />
-                    <YAxis />
+                    <YAxis allowDecimals={false} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" fill="#82ca9d" />
-                  </BarChart>
+                    <Line 
+                      type="monotone" 
+                      dataKey="count" 
+                      name="Reports" 
+                      stroke="#8884d8" 
+                      activeDot={{ r: 8 }}
+                      strokeWidth={2}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+              <CardHeader>
+                <CardTitle className="text-lg">Insight</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {timeData.reduce((sum, day) => sum + day.count, 0) > 10 
+                    ? "There has been increased reporting activity over the past week, suggesting growing community engagement with the KAVACH platform."
+                    : "Reporting activity has been relatively stable over the past week. Continued community outreach may help increase engagement."}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/50 backdrop-blur-sm border border-civic-primary/20">
+              <CardHeader>
+                <CardTitle className="text-lg">Blockchain Security</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  All KAVACH statistics are derived from immutable blockchain records, ensuring data integrity and transparency. 
+                  This provides a reliable foundation for community safety planning and resource allocation.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
+      
+      <Separator className="my-8" />
+      
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-4">KAVACH: Powered by Blockchain</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+          All data presented in this dashboard is securely stored on the blockchain, 
+          ensuring transparency, immutability, and trust in crime reporting statistics.
+        </p>
+        
+        <div className="flex justify-center gap-2">
+          <Button variant="outline" size="sm">
+            Export Data
+          </Button>
+          <Button variant="outline" size="sm">
+            View on Blockchain
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
